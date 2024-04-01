@@ -22,7 +22,7 @@ function FreeMaterial() {
       </div>
       <div
         class="container-0-1-87"
-        onClick={() => window.location.assign("free-material/add-video")}
+        onClick={() => window.location.assign("/free-material/add-video")}
       >
         <div class="iconContainer-0-1-88">
           <i

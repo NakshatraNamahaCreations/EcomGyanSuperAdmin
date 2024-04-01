@@ -70,6 +70,24 @@ const Header = () => {
           </div>
         </div>
       );
+    case "/free-material/add-document":
+      return (
+        <div>
+          <div className="headerTitle-0-1-70">Document </div>
+          <div className="headerDesc-0-1-71">
+            <div>Add / view free material for your visitors</div>
+          </div>
+        </div>
+      );
+    case "/free-material/add-video":
+      return (
+        <div>
+          <div className="headerTitle-0-1-70">Video </div>
+          <div className="headerDesc-0-1-71">
+            <div>Add / view free material for your visitors</div>
+          </div>
+        </div>
+      );
     case "/campaigns/list":
       return (
         <div>

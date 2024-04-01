@@ -18,7 +18,6 @@ function ManageBanners() {
       alignItems: "center",
       color: "#25cff2",
     },
-
     bannerImageCont: {
       width: "200px",
       height: "150px",

@@ -1,12 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import "./style/adddocument.css";
 import { Button, Offcanvas } from "react-bootstrap";
 
-function AddDocument() {
+function AddVideo() {
   const [show, setShow] = useState(false);
-  const [isOpen, setIsOpen] = useState(null);
-  const [showEditCanvas, setShowEditCanvas] = useState(false);
-  const [selectedObj, setSelectedObj] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   const handleDocumentUpload = (e) => {
@@ -17,29 +14,11 @@ function AddDocument() {
   const handleSubmitChanges = (e) => {
     setShow(false);
   };
+  console.log("selectedFiles", selectedFiles);
 
-  const handleDeletObj = () => {
+  const handleDeleteVideo = () => {
     alert("Deleted");
   };
-  // const handleShowPopUp = (index) => {
-  //   setIsOpen(index); // Set the index of the object to open its popup
-  //   setSelectedObj(index); // Optionally set the selected object
-  //   console.log("selectedObj", selectedObj);
-  // };
-  // const popupRef = useRef(null);
-
-  // useEffect(() => {
-  //   const handleClickOutside = (event) => {
-  //     if (popupRef.current && !popupRef.current.contains(event.target)) {
-  //       setIsOpen(false);
-  //     }
-  //   };
-  //   document.addEventListener("mousedown", handleClickOutside);
-  //   return () => {
-  //     document.removeEventListener("mousedown", handleClickOutside);
-  //   };
-  // }, []);
-
   const styles = {
     uploadImage: {
       border: "1px dashed #25cff2",
@@ -79,6 +58,7 @@ function AddDocument() {
       // boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
     },
   };
+
   return (
     <div class="bodyContainer-0-1-281">
       <div class="listContainer-0-1-295 mt-4">
@@ -88,14 +68,16 @@ function AddDocument() {
             variant="info"
             onClick={() => setShow(true)}
           >
-            Add Content
+            Add Video
           </Button>
           <Button
             className="px-5 py-2 ms-2"
             variant="outline-info"
-            onClick={() => window.location.assign("/free-material/add-video")}
+            onClick={() =>
+              window.location.assign("/free-material/add-document")
+            }
           >
-            Add Video
+            Add Document
           </Button>
         </div>
         {/* <div class="heading-0-1-294">Contents</div> */}
@@ -103,48 +85,29 @@ function AddDocument() {
           {Array.from({ length: 3 }, (_, i) => (
             <div class="root-0-1-372 root-d105-0-1-723 listItem-0-1-370">
               <div class="content-0-1-373 flex1-0-1-385">
-                <svg
-                  width="80"
-                  height="60"
-                  viewBox="0 0 80 60"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="icon-0-1-374 icon-d106-0-1-724 flex0-0-1-386"
-                >
-                  <rect width="80" height="60" rx="4" fill="#F2FBFE"></rect>
-                  <path
-                    d="M43.1429 13H29.4286C28.5193 13 27.6472 13.3612 27.0042 14.0042C26.3612 14.6472 26 15.5193 26 16.4286V43.8571C26 44.7665 26.3612 45.6385 27.0042 46.2815C27.6472 46.9245 28.5193 47.2857 29.4286 47.2857H50C50.9093 47.2857 51.7814 46.9245 52.4244 46.2815C53.0673 45.6385 53.4286 44.7665 53.4286 43.8571V23.2857L43.1429 13Z"
-                    fill="#EB5757"
-                    stroke="#FF8888"
-                    stroke-width="1.71429"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></path>
-                  <path d="M43.1426 13V23.2857H53.4283" fill="#FF8888"></path>
-                  <path
-                    d="M43.1426 13V23.2857H53.4283"
-                    stroke="#FF8888"
-                    stroke-width="1.71429"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></path>
-                  <path
-                    d="M32.4336 35.0445V29.8125H34.9022C35.4142 29.8125 35.8165 29.9405 36.109 30.1965C36.4062 30.4479 36.5547 30.8456 36.5547 31.3896C36.5547 31.7279 36.4839 32.0205 36.3422 32.2674C36.205 32.5142 36.0107 32.7039 35.7593 32.8365C35.5079 32.9645 35.2222 33.0285 34.9022 33.0285H33.661V35.0445H32.4336ZM34.7307 31.9656C35.1376 31.9656 35.341 31.7874 35.341 31.4308C35.341 31.2616 35.2885 31.1336 35.1833 31.0468C35.0827 30.9554 34.9319 30.9096 34.7307 30.9096H33.661V31.9656H34.7307Z"
-                    fill="white"
-                  ></path>
-                  <path
-                    d="M37.1144 35.0445V29.8125H38.6984C39.5898 29.8125 40.2733 30.0365 40.7487 30.4845C41.2241 30.9325 41.4618 31.5771 41.4618 32.4182C41.4618 33.2639 41.2241 33.9131 40.7487 34.3656C40.2733 34.8182 39.5898 35.0445 38.6984 35.0445H37.1144ZM38.6847 33.9474C39.1967 33.9474 39.583 33.8239 39.8435 33.5771C40.1041 33.3256 40.2344 32.9394 40.2344 32.4182C40.2344 31.9291 40.0973 31.5565 39.823 31.3005C39.5487 31.0399 39.1693 30.9096 38.6847 30.9096H38.3418V33.9474H38.6847Z"
-                    fill="white"
-                  ></path>
-                  <path
-                    d="M43.3173 35.0445H42.0898V29.8125H45.6624V30.9096H43.3173V31.8834H45.4361V32.9736H43.3173V35.0445Z"
-                    fill="white"
-                  ></path>
-                </svg>
+                <iframe
+                  style={{
+                    width: "80px",
+                    height: "60px",
+                  }}
+                  src="https://www.youtube.com/embed/ZeY07Asv4KE"
+                  title="Big Reason Behind Changing My Youtube Channel Name!!!"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerpolicy="strict-origin-when-cross-origin"
+                  allowfullscreen
+                  aria-current
+                ></iframe>
                 <div class="rightContentCont-0-1-375 rightContentCont-d107-0-1-725 flex1-0-1-385">
-                  <p class="heading-0-1-376 heading-d108-0-1-726 textTruncate-0-1-387">
-                    Ecom gyan ebook2023.pdf
-                  </p>
+                  <a
+                    href="https://www.youtube.com/watch?v=ZeY07Asv4KE&t=306s"
+                    target="_blank"
+                    style={{ textDecoration: "none" }}
+                  >
+                    <p class="heading-0-1-376 heading-d108-0-1-726 textTruncate-0-1-387">
+                      Ecom gyan ebook2023.pdf
+                    </p>
+                  </a>
                   <p class="subHeading-0-1-377 subHeading-d109-0-1-727">
                     Ronald C Matt
                   </p>
@@ -152,7 +115,7 @@ function AddDocument() {
                 <div class="flex0-0-1-637 others-0-1-629 others-d5-0-1-645">
                   <div
                     style={{ cursor: "Pointer" }}
-                    onClick={() => handleDeletObj(i)}
+                    onClick={() => handleDeleteVideo(i)}
                   >
                     <img
                       src="https://classplusapp.com/diy/assets/trash-2-db8990c1..svg"
@@ -210,29 +173,25 @@ function AddDocument() {
         />
         <input class="blankStyle" type="reset" multiple="" />
       </form> */}
-      {/* ................creating  a new file............... */}
       <Offcanvas show={show} onHide={() => setShow(false)} placement="end">
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>Upload documents</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          <div style={styles.uploadImage}>
-            <div className="d-flex p-2" style={styles.insideBox}>
-              <i class="fa-solid fa-circle-plus me-1"></i>{" "}
-              <input
-                accept="image/jpeg,image/jpeg,image/png,application/pdf"
-                style={{ display: "none" }}
-                id="icon-button-file"
-                type="file"
-                multiple
-                onChange={(e) => handleDocumentUpload(e)}
-              />
-              <label className="cursor-pointer" htmlFor="icon-button-file">
-                Select Documents
-              </label>
-            </div>
+          <div>
+            {/* <div className="d-flex p-2" style={styles.insideBox}> */}
+            <label>
+              <b>YouTube link</b>
+            </label>
+            <br />
+            <input
+              class="mt-2 input-0-1-685 input-d15-0-1-1047 uploadText-0-1-649 uploadText-d63-0-1-1036"
+              type="text"
+              placeholder="Enter or Paste YouYube Link"
+            />
+            {/* </div> */}
           </div>
-          {selectedFiles.length > 0 && (
+          {/* {selectedFiles.length > 0 && (
             <>
               {selectedFiles.map((file, index) => (
                 <div className="uploadItem-0-1-648" key={index}>
@@ -294,7 +253,7 @@ function AddDocument() {
                 </div>
               ))}
             </>
-          )}
+          )} */}
 
           {/* {selectedFiles.length > 0 && (
             <div class="uploadItem-0-1-648">
@@ -332,4 +291,4 @@ function AddDocument() {
   );
 }
 
-export default AddDocument;
+export default AddVideo;

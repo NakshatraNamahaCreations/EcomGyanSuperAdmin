@@ -1,9 +1,9 @@
 .bodyContainer-0-1-281 {
   border: none !important;
-  height: 65vh;
+  height: 100vh;
   display: flex;
-  padding: 2rem;
-  margin-top: 10px;
+  /* padding: 2rem; */
+  /* margin-top: 10px; */
   border-radius: 10px !important;
   flex-direction: row;
   justify-content: space-between;
@@ -155,4 +155,75 @@
 .text-d61-0-1-718.text-d61-0-1-718 {
   font-size: 18px;
   line-height: 26px;
+}
+.uploadItem-0-1-648 {
+  width: 100%;
+  /* height: 20%; */
+  display: flex;
+  padding: 9px 0px;
+  align-items: center;
+  border-bottom: 1px solid rgb(216, 224, 240);
+  flex-direction: row;
+  justify-content: flex-start;
+}
+.uploadImg-0-1-650 {
+  width: 15%;
+}
+.uploadText-d39-0-1-996 {
+  margin-right: 0px;
+}
+.uploadText-0-1-649 {
+  width: 300px;
+}
+.input-0-1-685 {
+  width: 100%;
+  border: 1px solid rgb(216, 224, 240);
+  outline: none;
+  padding: 12px 12px 12px 16px;
+  font-size: 16px;
+  /* font-family: "Nunito Sans"; */
+  /* font-weight: 600; */
+  line-height: 24px;
+  border-radius: 16px;
+}
+.others-0-1-629.others-0-1-629 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.popupContainer-0-1-647 {
+  gap: 1px;
+  top: 25px;
+  right: 0px;
+  width: 213px;
+  border: 1px solid rgba(216, 224, 240);
+  display: flex;
+  z-index: 8;
+  overflow: hidden;
+  position: absolute;
+  box-shadow: 0px 2px 4px rgba(40, 41, 61, 0.04),
+    0px 8px 16px rgba(96, 97, 112, 0.16);
+  border-radius: 14px;
+  flex-direction: column;
+  background-color: rgba(255, 255, 255);
+}
+.listItemContainer-0-1-648 {
+  color: rgba(125, 133, 146);
+  cursor: pointer;
+  display: flex;
+  padding: 8px 8px 8px 12px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+.iconImage-0-1-649 {
+  margin-right: 8px;
+}
+.listItemContainer-0-1-648:hover {
+  color: rgba(10, 22, 41);
+  background-color: rgba(244, 244, 244);
+}
+/* ..............................AddVideo Component Css here........................ */
+.ytp-large-play-button {
+  display: none !important;
 }

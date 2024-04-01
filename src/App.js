@@ -17,6 +17,7 @@ import UserAction from "./Component/Campaigns/UserAction";
 import Users from "./Component/Peoples/Users";
 import UserProfile from "./Component/Peoples/UserProfile";
 import AddModules from "./Component/Courses/AddModules";
+import AddVideo from "./Component/Content/AddVideo";
 
 function App() {
   return (
@@ -140,6 +141,19 @@ function App() {
                 <>
                   <Header />
                   <AddDocument />
+                </>
+              }
+            />
+          }
+        />
+        <Route
+          path="/free-material/add-video"
+          element={
+            <Layout
+              Children={
+                <>
+                  <Header />
+                  <AddVideo />
                 </>
               }
             />

@@ -262,7 +262,7 @@ function AddCourse() {
                   {error && <div style={{ color: "red" }}>{error}</div>}
                 </span>
               </div>
-              <div className="col-md-6 mb-4">
+              {/* <div className="col-md-6 mb-4">
                 <label>
                   <b>Add Video</b>
                 </label>
@@ -302,7 +302,7 @@ function AddCourse() {
                     <div style={{ color: "red" }}>{videoError}</div>
                   )}
                 </span>
-              </div>
+              </div> */}
             </div>
             {/* <div className="mb-4">
               <label>
