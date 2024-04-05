@@ -1,6 +1,6 @@
 .bodyContainer-0-1-281 {
   border: none !important;
-  height: 100vh;
+  height: fit-content;
   display: flex;
   /* padding: 2rem; */
   /* margin-top: 10px; */
@@ -23,6 +23,7 @@
   /* width: 100%;
   height: 90%;
   overflow-y: auto; */
+  margin-bottom: 100px;
 }
 .root-d105-0-1-723.root-d105-0-1-723 {
   padding: 12px 6.67px;

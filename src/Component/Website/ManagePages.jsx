@@ -1,13 +1,61 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Offcanvas } from "react-bootstrap";
 import "./style/managepages.css";
+import { getData, postFormData } from "../../Api-Service/apiHelper";
+import { apiUrl } from "../../Api-Service/apiConstants";
 
 function ManagePages() {
+  const formData = new FormData();
   const [show, setShow] = useState(false);
   const [error, setError] = useState(null);
   const [seteditView, setEditView] = useState(false);
+  const [bannerData, setBannerData] = useState([]);
+  const [selectedBannerData, setSelectedBannerData] = useState({});
+  const [newBanner, setNewBanner] = useState([
+    { selectScreen: "", screenImage: null },
+  ]);
+  const [editBanner, setEditBanner] = useState([
+    {
+      selectScreen: "",
+      screenImage: null,
+    },
+  ]);
+  useEffect(() => {
+    fetchData();
+  }, []);
+  const fetchData = async () => {
+    try {
+      const appResponse = await getData(apiUrl.GET_WEB_BANNER);
+      setBannerData(appResponse.data);
+      // const webResponse = await getData(apiUrl.GET_WEB_BANNER);
+      // setBannerData1(webResponse.data);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 
-  const [bannerImage, setBannerImage] = useState(null);
+  const handleBannerImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const fileType = file.type;
+      if (!fileType.startsWith("image/")) {
+        setError("Please upload a valid image file (PNG or JPEG).");
+        return;
+      }
+      const maxSize = 800 * 600;
+      if (file.size > maxSize) {
+        setError("Image size should be 800px x 600px or smaller.");
+        return;
+      }
+      setError(null);
+      setNewBanner({ ...newBanner, screenImage: e.target.files[0] });
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setNewBanner({ ...newBanner, selectScreen: e.target.value });
+  };
+
   const styles = {
     uploadImage: {
       border: "1px dashed #25cff2",
@@ -47,35 +95,56 @@ function ManagePages() {
     },
   };
 
-  const handleBannerImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Check file type
-      const fileType = file.type;
-      if (!fileType.startsWith("image/")) {
-        // Display an error message on the screen
-        setError("Please upload a valid image file (PNG or JPEG).");
-        return;
-      }
-      // Check file size
-      const maxSize = 800 * 600; // 800px x 600px
-      if (file.size > maxSize) {
-        // Display an error message on the screen
-        setError("Image size should be 800px x 600px or smaller.");
-        return;
-      }
-      // Clear any previous errors
-      setError(null);
-      // Set thumbnail image
-      setBannerImage(file);
-    }
-  };
+  // const handleBannerImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     // Check file type
+  //     const fileType = file.type;
+  //     if (!fileType.startsWith("image/")) {
+  //       // Display an error message on the screen
+  //       setError("Please upload a valid image file (PNG or JPEG).");
+  //       return;
+  //     }
+  //     // Check file size
+  //     const maxSize = 800 * 600; // 800px x 600px
+  //     if (file.size > maxSize) {
+  //       // Display an error message on the screen
+  //       setError("Image size should be 800px x 600px or smaller.");
+  //       return;
+  //     }
+  //     // Clear any previous errors
+  //     setError(null);
+  //     // Set thumbnail image
+  //     setBannerImage(file);
+  //   }
+  // };
 
   const handleSubmitChanges = (e) => {
     setShow(false);
   };
   const handleEditChanges = (e) => {
     setEditView(false);
+  };
+
+  const addBanner = async (e) => {
+    e.preventDefault();
+    if (!newBanner.selectScreen || !newBanner.screenImage) {
+      alert("please fill all fields");
+    } else {
+      formData.append("screenName", newBanner.selectScreen);
+      formData.append("bannerImage", newBanner.screenImage);
+      formData.append("bannerType", "app");
+      try {
+        const response = await postFormData(apiUrl.CREATE_BANNERS, formData);
+        console.log("POST Request Success:", response);
+        alert("Added");
+        fetchData();
+        setShow(false);
+        setNewBanner("");
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
   };
   return (
     <div className=" mt-4">
@@ -87,8 +156,8 @@ function ManagePages() {
         Add Banners
       </Button>
       <div className="row">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div className="col-md-4" key={i}>
+        {bannerData.map((ele, index) => (
+          <div className="col-md-4" key={index}>
             <div style={{ backgroundColor: "white" }}>
               <div class="Banner__Main__Left__Content__ImageSection">
                 <div>
@@ -107,7 +176,7 @@ function ManagePages() {
                   <div class="UploadedImageArea" id="UploadedImageArea">
                     <img
                       class="panel-body-image Banner__Main__Left__Content__ImageSection--Image"
-                      src="https://cdn-wl-assets.classplus.co/production/single/glknlf/56a04f27-bee7-4b5a-bdd9-29e2c6b63ba0.png"
+                      src={`${apiUrl.IMAGEURL}/banners/${ele.bannerImage}`}
                       alt="notificationImage"
                       id="UploadedImage"
                       style={{ maxWidth: "100%", maxHeight: "100%" }}
@@ -124,16 +193,16 @@ function ManagePages() {
                   </div>
                 </div>
                 <div class="Banner__Main__Left__Content__ImageSection--Select">
-                  <div class="Banner__Main__Left__Content__ImageSection--Select--Note">
+                  {/* <div class="Banner__Main__Left__Content__ImageSection--Select--Note">
                     Select screen to open on tapping banner
-                  </div>
+                  </div> */}
                   <div class="Banner__Main__Left__Content__ImageSection--Select--Action">
                     <div class="Banner__Main__Left__Content__ImageSection--Select--Action--Selected">
-                      YouTube Video
+                      {ele.screenName}
                     </div>
                     <div
                       class="Banner__Main__Left__Content__ImageSection--Select--Action--Change"
-                      onClick={() => setEditView(true)}
+                      onClick={() => handleEditChanges(ele)}
                     >
                       Change
                     </div>
@@ -171,13 +240,18 @@ function ManagePages() {
             <label>
               <b>Select Landing Screen</b>
             </label>
-            <select className="mt-2 mb-4" style={styles.selectField}>
-              <option value="Home">Home</option>
-              <option value="About Us">About Us</option>
-              <option value="Courses">Courses</option>
-              <option value="Gallery">Gallery</option>
-              <option value="Testimonials">Testimonials</option>
-              <option value="Contact Us">Contact Us</option>
+            <select
+              className="mt-2 mb-4"
+              style={styles.selectField}
+              onChange={handleInputChange}
+            >
+              <option value="">Select</option>
+              <option value="Store Tab">Store Tab</option>
+              <option value="Specific Course(s)">Specific Course(s)</option>
+              <option value="Category of Courses">Category of Courses</option>
+              <option value="External Link">External Link</option>
+              <option value="Youtube Video">Youtube Video</option>
+              <option value="Free Course material">Free Course material</option>
             </select>
             <div style={styles.uploadImage}>
               <div className="d-flex p-2" style={styles.insideBox}>
@@ -187,16 +261,16 @@ function ManagePages() {
                   style={{ display: "none" }}
                   id="icon-button-file"
                   type="file"
-                  onChange={(e) => handleBannerImageChange(e)}
+                  onChange={handleBannerImageChange}
                 />
                 <label htmlFor="icon-button-file">Upload Banner Image</label>
               </div>
             </div>
-            {bannerImage && (
+            {newBanner.screenImage && (
               <div style={styles.bannerImageCont}>
                 <img
-                  src={URL.createObjectURL(bannerImage)}
-                  alt={bannerImage}
+                  src={URL.createObjectURL(newBanner.screenImage)}
+                  alt={newBanner.screenImage}
                   style={{ width: "100%", height: "100%", marginTop: "20px" }}
                 />
               </div>
@@ -248,20 +322,19 @@ function ManagePages() {
                 <label htmlFor="icon-button-file">Upload Banner Image</label>
               </div>
             </div>
-            {bannerImage ? (
+            {editBanner.screenImage ? (
               <div style={styles.bannerImageCont}>
                 <img
-                  src={URL.createObjectURL(bannerImage)}
-                  alt={bannerImage}
+                  src={URL.createObjectURL(editBanner.screenImage)}
+                  alt={editBanner.screenImage}
                   style={{ width: "100%", height: "100%", marginTop: "20px" }}
                 />
               </div>
             ) : (
               <div style={styles.bannerImageCont}>
                 <img
-                  src="/20ca6a66-7599-4661-b64b-a73715a2893b.png"
-                  // src={URL.createObjectURL(bannerImage)}
-                  // alt={thumbnailImage.name}
+                  src={`${apiUrl.IMAGEURL}/banners/${selectedBannerData.bannerImage}`}
+                  // src={selectedBannerData.bannerImage}
                   style={{ width: "100%", height: "100%", marginTop: "20px" }}
                 />
               </div>

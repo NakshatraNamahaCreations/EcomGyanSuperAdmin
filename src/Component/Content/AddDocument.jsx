@@ -1,26 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./style/adddocument.css";
 import { Button, Offcanvas } from "react-bootstrap";
+import { deleteData, getData } from "../../Api-Service/apiHelper";
+import { apiUrl } from "../../Api-Service/apiConstants";
 
 function AddDocument() {
-  const [show, setShow] = useState(false);
-  const [isOpen, setIsOpen] = useState(null);
-  const [showEditCanvas, setShowEditCanvas] = useState(false);
-  const [selectedObj, setSelectedObj] = useState(null);
-  const [selectedFiles, setSelectedFiles] = useState([]);
-
-  const handleDocumentUpload = (e) => {
-    const file = e.target.files;
-    const selectedFiles = Array.from(file).map((file) => file);
-    setSelectedFiles(selectedFiles);
-  };
-  const handleSubmitChanges = (e) => {
-    setShow(false);
-  };
-
-  const handleDeletObj = () => {
-    alert("Deleted");
-  };
   // const handleShowPopUp = (index) => {
   //   setIsOpen(index); // Set the index of the object to open its popup
   //   setSelectedObj(index); // Optionally set the selected object
@@ -79,6 +63,53 @@ function AddDocument() {
       // boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
     },
   };
+  const [show, setShow] = useState(false);
+  const [isOpen, setIsOpen] = useState(null);
+  const [showEditCanvas, setShowEditCanvas] = useState(false);
+  const [selectedObj, setSelectedObj] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [allDocs, setAllDocs] = useState([]);
+  const [allDocsaa, setAllDocsaa] = useState([]);
+
+  const handleDocumentUpload = (e) => {
+    const file = e.target.files;
+    const selectedFiles = Array.from(file).map((file) => file);
+    setSelectedFiles(selectedFiles);
+  };
+  const handleSubmitChanges = (e) => {
+    setShow(false);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+  const fetchData = async () => {
+    try {
+      const documentRes = await getData(apiUrl.GET_FREEMATERIAL_DOCUMENT);
+      setAllDocsaa(documentRes.data);
+      setAllDocs(documentRes.data.flatMap((docs) => docs.materialDocuments));
+      // const webResponse = await getData(apiUrl.GET_WEB_BANNER);
+      // setBannerData1(webResponse.data);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  const handleDeletObj = async (id) => {
+    try {
+      const res = await deleteData(
+        `${apiUrl.DELETE_FREEMATERIAL_DOCUMENT}${id}`
+      );
+      if (res) {
+        alert("Deleted Sucessfull");
+        window.location.reload();
+      } else {
+        alert("Something went wrong!");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  console.log("allDocs", allDocs.length);
   return (
     <div class="bodyContainer-0-1-281">
       <div class="listContainer-0-1-295 mt-4">
@@ -100,8 +131,11 @@ function AddDocument() {
         </div>
         {/* <div class="heading-0-1-294">Contents</div> */}
         <div class="container-0-1-369 mt-3">
-          {Array.from({ length: 3 }, (_, i) => (
-            <div class="root-0-1-372 root-d105-0-1-723 listItem-0-1-370">
+          {allDocs.map((docs, index) => (
+            <div
+              class="root-0-1-372 root-d105-0-1-723 listItem-0-1-370"
+              key={index}
+            >
               <div class="content-0-1-373 flex1-0-1-385">
                 <svg
                   width="80"
@@ -143,16 +177,16 @@ function AddDocument() {
                 </svg>
                 <div class="rightContentCont-0-1-375 rightContentCont-d107-0-1-725 flex1-0-1-385">
                   <p class="heading-0-1-376 heading-d108-0-1-726 textTruncate-0-1-387">
-                    Ecom gyan ebook2023.pdf
+                    {docs.documentImage}
                   </p>
-                  <p class="subHeading-0-1-377 subHeading-d109-0-1-727">
+                  {/* <p class="subHeading-0-1-377 subHeading-d109-0-1-727">
                     Ronald C Matt
-                  </p>
+                  </p> */}
                 </div>
                 <div class="flex0-0-1-637 others-0-1-629 others-d5-0-1-645">
                   <div
                     style={{ cursor: "Pointer" }}
-                    onClick={() => handleDeletObj(i)}
+                    onClick={() => handleDeletObj(docs._id)}
                   >
                     <img
                       src="https://classplusapp.com/diy/assets/trash-2-db8990c1..svg"

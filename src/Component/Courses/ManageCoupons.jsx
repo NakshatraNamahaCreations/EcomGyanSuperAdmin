@@ -1,103 +1,34 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import CreateCoupons from "./CreateCoupons";
 import "./style/managecoupons.css";
+import { getData } from "../../Api-Service/apiHelper";
+import { apiUrl } from "../../Api-Service/apiConstants";
+import moment from "moment";
 
 function ManageCoupons() {
   const [show, setShow] = useState(false);
   const [showDropDown, setShowDropDown] = useState(false);
-  const [error, setError] = useState(null);
-  const [seteditView, setEditView] = useState(false);
-
-  const [bannerImage, setBannerImage] = useState(null);
 
   const handleClose = () => {
     setShow(false);
   };
+  const [couponList, setCouponList] = useState([]);
 
-  const styles = {
-    uploadImage: {
-      border: "1px dashed #25cff2",
-    },
-    insideBox: {
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      color: "#25cff2",
-    },
-
-    bannerImageCont: {
-      width: "200px",
-      height: "150px",
-    },
-    imgStateText: {
-      fontSize: "14px",
-      fontStyle: "normal",
-      fontFamily: "inherit",
-      fontWeight: "600",
-      lineHeight: "16px",
-      paddingLeft: "11px",
-      color: "rgb(239, 105, 30)",
-    },
-    selectField: {
-      width: "100%",
-      border: "1px solid rgb(216, 224, 240)",
-      // borderRadius: "16px",
-      fontSize: "16px",
-      backgroundColor: "white",
-      outline: "none",
-      backgroundPosition: "10px 10px",
-      backgroundRepeat: "no-repeat",
-      padding: "12px 18px 11px 13px",
-      lineHeight: "20px",
-      // boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
-    },
-    courseInput: {
-      width: "100%",
-      border: "1px solid rgb(216, 224, 240)",
-      borderRadius: "16px",
-      fontSize: "16px",
-      backgroundColor: "white",
-      outline: "none",
-      backgroundPosition: "10px 10px",
-      backgroundRepeat: "no-repeat",
-      padding: "12px 18px 11px 13px",
-      lineHeight: "24px",
-      // boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
-    },
-  };
-
-  const handleBannerImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Check file type
-      const fileType = file.type;
-      if (!fileType.startsWith("image/")) {
-        // Display an error message on the screen
-        setError("Please upload a valid image file (PNG or JPEG).");
-        return;
-      }
-      // Check file size
-      const maxSize = 800 * 600; // 800px x 600px
-      if (file.size > maxSize) {
-        // Display an error message on the screen
-        setError("Image size should be 800px x 600px or smaller.");
-        return;
-      }
-      // Clear any previous errors
-      setError(null);
-      // Set thumbnail image
-      setBannerImage(file);
+  useEffect(() => {
+    fetchData();
+  }, []);
+  const fetchData = async () => {
+    try {
+      const couponRes = await getData(apiUrl.GET_ALL_COUPON);
+      setCouponList(couponRes.data);
+      // const webResponse = await getData(apiUrl.GET_WEB_BANNER);
+      // setBannerData1(webResponse.data);
+    } catch (error) {
+      console.error("Error:", error);
     }
   };
-
-  const handleSubmitChanges = (e) => {
-    setShow(false);
-  };
-  const handleEditChanges = (e) => {
-    setEditView(false);
-  };
-
+  console.log("couponList", couponList);
   return (
     <div className=" mt-4">
       {!show && (
@@ -111,8 +42,8 @@ function ManageCoupons() {
             Create Coupon
           </Button>
           <div className="row">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div className="col-md-12" key={i}>
+            {couponList.map((coupon, index) => (
+              <div className="col-md-12" key={index}>
                 <div
                   class="infinite-scroll-component"
                   style={{ height: "auto", overflow: "unset" }}
@@ -120,21 +51,23 @@ function ManageCoupons() {
                   <div class="CouponListCard_couponListCard__SX0FT">
                     <div class="CouponListCard_couponInfo__10kC8">
                       <div>
-                        <h2>₹ 12 OFF</h2>
-                        <span class="sc-jzJRlG jgIAfD">XEFWBVNBV</span>
+                        <h2>₹ {coupon.discountAmount} OFF</h2>
+                        <span class="sc-jzJRlG jgIAfD">
+                          {coupon.couponCode}
+                        </span>
                       </div>
                     </div>
                     <div>
                       <div class="cp-flex j-between">
                         <div>
                           <div class="CouponListCard_couponName__3d9xG">
-                            threa
+                            {coupon.offerName}
                           </div>
                           <div class="fontSmall ">
-                            Created by Ronald C Matt
+                            {/* Created by Ronald C Matt */}
                             <span class="circle mx1o6 fontGray"></span>
                             <span class="CouponListCard_capitalizeText___Tgcj textPrimary">
-                              Public Coupon
+                              {coupon.couponType}
                             </span>
                           </div>
                         </div>
@@ -229,8 +162,16 @@ function ManageCoupons() {
                             /> */}
                             {/* <i class="fa-solid fa-ellipsis-vertical sc-ifAKCX gJUBjn"></i> */}
 
-                            <span>2024/03/15, 06:35 pm</span>
-                            <span> - 2024/03/20, 01:00 am</span>
+                            <span>
+                              {" "}
+                              {moment(coupon.startDate).format("ll")},{" "}
+                              {coupon.startTime}{" "}
+                            </span>
+                            <span>
+                              {" "}
+                              - {moment(coupon.endDate).format("ll")}{" "}
+                              {coupon.endTime}
+                            </span>
                           </div>
                           <span class="CouponListCard_divider__2I5BA">|</span>
                           <button class="sc-jTzLTM dQcZQY" color="primary">

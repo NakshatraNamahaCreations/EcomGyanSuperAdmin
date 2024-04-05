@@ -71,3 +71,22 @@
   position: absolute;
   font-size: 18px;
 }
+
+.container-0-1-2782 {
+  flex: 1;
+  height: 80%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+.heading-0-1-2783 {
+  font-size: 20px;
+  font-weight: 700;
+}
+.description-0-1-2784 {
+  color: #7d8592;
+  font-size: 16px;
+  margin-top: 8px;
+  font-weight: 400;
+}

@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./style/mycourses.css";
+import { getData, postFormData } from "../../Api-Service/apiHelper";
+import { apiUrl } from "../../Api-Service/apiConstants";
 
 function MyCourse() {
   const styles = {
@@ -36,6 +38,25 @@ function MyCourse() {
       backgroundColor: "#9797ff61",
     },
   };
+
+  const [allCourse, setAllCourse] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const appResponse = await getData(apiUrl.GET_All_COURSE);
+      setAllCourse(appResponse.data);
+      // const webResponse = await getData(apiUrl.GET_WEB_BANNER);
+      // setBannerData1(webResponse.data);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  console.log("allCourse", allCourse);
+
   return (
     <div className="mt-3">
       <div className="d-flex justify-content-between mt-3">
@@ -66,45 +87,77 @@ function MyCourse() {
       </div>
       <div className="mt-3">
         <div className="row">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div className="col-md-3 mb-4" key={index}>
-              <div className="courseCard-0-1-330">
+          {allCourse.length === 0 ? (
+            <div className="mt-5">
+              <div class="container-0-1-2782" id="foldersListID">
+                <img
+                  src="https://www.freeiconspng.com/uploads/training-icon-19.png"
+                  width="350"
+                  alt="img"
+                  style={{ mixBlendMode: "luminosity" }}
+                />
+                <div class="heading-0-1-2783">No Courses Added</div>
+                <div class="description-0-1-2784">
+                  Add course to be shown to students on your app
+                </div>
                 <div
-                  className="courseCardTag-0-1-331"
-                  style={styles.courseCardTag}
+                  style={{
+                    visibility: "hidden",
+                    height: "5px",
+                    overflow: "hidden",
+                  }}
                 >
-                  <i className="fa-solid fa-star"></i> Featured Course
-                </div>
-                <div className="courseCardImage-0-1-334">
-                  <img
-                    className="courseCardImage-0-1-334"
-                    src="https://ali-cdn-wl-assets.classplus.co/production/single/glknlf/20ca6a66-7599-4661-b64b-a73715a2893b.png"
-                    alt=""
-                  />
-                </div>
-                <div className="courseCardContent-0-1-335">
-                  <div className="courseCardTitle-0-1-336">
-                    Ecom Gyan Amazon FBA Mastery Course(HINDI) | Lifetime Access
-                    + UNLIMITED 1 on 1 Mentorship
-                  </div>
-                  <div className="courseCreatedBy-0-1-338">
-                    Created by: You(Owner)
-                  </div>
-                  <div className="courseCardTags-0-1-333">
-                    Lifetime Validity
-                  </div>
-                  <br />
-                  <div className="courseCardPriceSection-0-1-337">
-                    <div
-                      style={{ color: "rgb(10, 22, 41)", fontWeight: "700" }}
-                    >
-                      ₹16997
-                    </div>
-                  </div>
+                  *
                 </div>
               </div>
             </div>
-          ))}
+          ) : (
+            <>
+              {allCourse.map((ele, index) => (
+                <div className="col-md-3 mb-4" key={index}>
+                  <div className="courseCard-0-1-330">
+                    {ele.courseFeature === true && (
+                      <div
+                        className="courseCardTag-0-1-331"
+                        style={styles.courseCardTag}
+                      >
+                        <i className="fa-solid fa-star"></i> Featured Course
+                      </div>
+                    )}
+                    <div className="courseCardImage-0-1-334">
+                      <img
+                        className="courseCardImage-0-1-334"
+                        src={`${apiUrl.IMAGEURL}/course/${ele.thumbnailImage}`}
+                        alt=""
+                      />
+                    </div>
+                    <div className="courseCardContent-0-1-335">
+                      <div className="courseCardTitle-0-1-336">
+                        {ele.courseName}
+                      </div>
+                      <div className="courseCreatedBy-0-1-338">
+                        Created by: You(Owner)
+                      </div>
+                      <div className="courseCardTags-0-1-333">
+                        {ele.durationType}
+                      </div>
+                      <br />
+                      <div className="courseCardPriceSection-0-1-337">
+                        <div
+                          style={{
+                            color: "rgb(10, 22, 41)",
+                            fontWeight: "700",
+                          }}
+                        >
+                          ₹ {ele.effectivePrice}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </div>
     </div>

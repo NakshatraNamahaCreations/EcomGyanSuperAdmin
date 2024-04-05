@@ -1,15 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import { Button } from "react-bootstrap";
 import "./style/addcourse.css";
+import { getData, postFormData } from "../../Api-Service/apiHelper";
+import { apiUrl } from "../../Api-Service/apiConstants";
+import { useNavigate, useParams } from "react-router-dom";
+// import { Navigate } from "react-router-dom";
 
 function AddCourse() {
-  const [thumbnailImage, setThumbnailImage] = useState(null);
-  const [videoFile, setVideoFile] = useState(null);
-  const [error, setError] = useState(null);
-  const [videoError, setVideoError] = useState(null);
-  const [price, setPrice] = useState("");
-  const [discount, setDiscount] = useState("");
   const styles = {
     courseInput: {
       width: "100%",
@@ -51,6 +49,97 @@ function AddCourse() {
       // boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
     },
   };
+  const Navigate = useNavigate();
+  const { id } = useParams();
+  const [checked, setChecked] = useState(false);
+  const [error, setError] = useState(null);
+  const [videoError, setVideoError] = useState(null);
+  const [price, setPrice] = useState("");
+  const [discount, setDiscount] = useState("");
+  const formData = new FormData();
+  const [courseTitle, setCourseTitle] = useState("");
+  const [courseDescription, setCourseDescription] = useState("");
+  const [freematerialVideo, setFreematerialVideo] = useState(null);
+  const [freeMaterialDocs, setFreeMaterialDocs] = useState(null);
+  const [materialDocsId, setMaterialDocsId] = useState("");
+  const [materialVideoId, setMaterialVideoId] = useState(null);
+  const [durationType, setDurationType] = useState("");
+  const [validity, setValidity] = useState("");
+  const [validityPeriod, setValidityPeriod] = useState("");
+  const [effectivePrice, setEffectivePrice] = useState("");
+  const [thumbnailImage, setThumbnailImage] = useState(null);
+  const [allVideo, setAllVideo] = useState([]);
+  const [allDocs, setAllDocs] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+  const fetchData = async () => {
+    try {
+      const videoRes = await getData(apiUrl.GET_FREEMATERIAL_VIDEO);
+      const documentRes = await getData(apiUrl.GET_FREEMATERIAL_DOCUMENT);
+      setAllVideo(videoRes.data);
+      setAllDocs(documentRes.data.flatMap((docs) => docs.materialDocuments));
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  // console.log("allVideo", "allDocs", allVideo, allDocs);
+
+  const handleDoc = (e, newValue) => {
+    if (newValue) {
+      setFreeMaterialDocs(newValue.originalName);
+      setMaterialDocsId(newValue._id);
+    }
+  };
+  const handleVideo = (e, newValue) => {
+    if (newValue) {
+      setFreematerialVideo(newValue.Videotitle);
+      setMaterialVideoId(newValue._id);
+    }
+  };
+  console.log("materialDocsId", materialDocsId, freeMaterialDocs);
+  const createCourse = async (e) => {
+    e.preventDefault();
+    if (
+      !courseTitle ||
+      // !newCourse.thumbnailImage ||
+      !price ||
+      !durationType ||
+      !validity ||
+      !validityPeriod
+    ) {
+      alert("please fill all fields");
+    } else {
+      formData.append("courseName", courseTitle);
+      formData.append("courseDescription", courseDescription);
+      formData.append("freeMaterialVideo", freematerialVideo);
+      formData.append("freeMaterialDocs", freeMaterialDocs);
+      formData.append("materialDocsId", materialDocsId);
+      formData.append("materialVideoId", materialVideoId);
+      formData.append("durationType", durationType);
+      formData.append("validity", validity);
+      formData.append("validityPeriod", validityPeriod);
+      formData.append("price", price);
+      formData.append("discount", discount);
+      formData.append("effectivePrice", effectivePrice);
+      formData.append("thumbnailImage", thumbnailImage);
+      formData.append("courseFeature", checked);
+      try {
+        const response = await postFormData(apiUrl.CREATE_COURSE, formData);
+        console.log("POST Request Success:", response);
+        const objectId = response.data._id;
+        const couserTitle = response.data.courseName;
+        alert("Added");
+        Navigate(
+          `/courses/add-modules/${objectId}/${encodeURIComponent(couserTitle)}`
+        );
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+  };
+
   const handleThumbnailChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -75,63 +164,23 @@ function AddCourse() {
     }
   };
 
-  // const handleVideoUpload = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     // Check file type
-  //     const fileType = file.type;
-  //     if (!fileType.startsWith("video/")) {
-  //       // Display an error message on the screen
-  //       setVideoError(
-  //         "Please upload a valid video file (mp4 or mkv or x-m4v)."
-  //       );
-  //       return;
-  //     }
-  //     // Check file size
-  //     const maxSize = 5242880; //  KB (5GB)
-  //     if (file.size > maxSize) {
-  //       // Display an error message on the screen
-  //       setError("Max. upto 5Gb per video");
-  //       return;
-  //     }
-  //     // Clear any previous errors
-  //     setVideoError(null);
-  //     // Set thumbnail image
-  //     setVideoFile(file);
-  //   }
-  // };
-
-  const handleVideoUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Check file type
-      const fileType = file.type;
-      if (!fileType.startsWith("video/")) {
-        setVideoError(
-          "Please upload a valid video file (mp4 or mkv or x-m4v)."
-        );
-        return;
-      }
-      // Clear any previous errors
-      setVideoError(null);
-      // Set video file
-      setVideoFile(file);
-    }
-  };
-
-  //   console.log("thumbnailImage", thumbnailImage, error);
-  //dropdown with search in react js?
-  const top100Films = [
-    { label: "The Shawshank Redemption", year: 1994 },
-    { label: "The Godfather", year: 1972 },
-    { label: "The Godfather: Part II", year: 1974 },
-  ];
-
   const calculateEffectiveAmount = (price, discount) => {
     const discountedAmount = Number(price) * (1 - Number(discount) / 100);
     return discountedAmount.toFixed(2);
   };
 
+  // Update effective price when price or discount changes
+  React.useEffect(() => {
+    if (price !== "" && discount !== "") {
+      const calculatedEffectivePrice = calculateEffectiveAmount(
+        price,
+        discount
+      );
+      setEffectivePrice(calculatedEffectivePrice);
+    }
+  }, [price, discount]);
+
+  console.log("checked", checked);
   return (
     <div className="addCourseMain-0-1-55 mt-3">
       <div className="p-4">
@@ -151,6 +200,7 @@ function AddCourse() {
                 name="search"
                 placeholder="Enter course name"
                 style={styles.courseInput}
+                onChange={(e) => setCourseTitle(e.target.value)}
               />
             </div>
 
@@ -165,6 +215,7 @@ function AddCourse() {
                 name="search"
                 placeholder="Enter course description here..."
                 style={styles.courseInput}
+                onChange={(e) => setCourseDescription(e.target.value)}
               />
             </div>
             <div
@@ -186,12 +237,12 @@ function AddCourse() {
                     className="mt-2"
                     disablePortal
                     id="combo-box-demo"
-                    // style={styles.courseInput}
-                    options={top100Films}
-                    // sx={{ width: 300 }}
+                    options={allDocs}
+                    getOptionLabel={(option) => option.originalName}
                     renderInput={(params) => (
                       <TextField {...params} label="Select documents" />
                     )}
+                    onChange={(e, newValue) => handleDoc(e, newValue)}
                   />
                 </div>
                 <div className="col-6">
@@ -203,12 +254,12 @@ function AddCourse() {
                     className="mt-2"
                     disablePortal
                     id="combo-box-demo"
-                    // style={styles.courseInput}
-                    options={top100Films}
-                    // sx={{ width: 300 }}
+                    options={allVideo}
+                    getOptionLabel={(option) => option.Videotitle}
                     renderInput={(params) => (
                       <TextField {...params} label="Select video" />
                     )}
+                    onChange={(e, newValue) => handleVideo(e, newValue)}
                   />
                 </div>
               </div>
@@ -347,7 +398,11 @@ function AddCourse() {
                 <b>Course Duration Type</b>
               </label>
               <br />
-              <select className="mt-2" style={styles.selectField}>
+              <select
+                className="mt-2"
+                style={styles.selectField}
+                onChange={(e) => setDurationType(e.target.value)}
+              >
                 <option value="">Select Course Duration</option>
                 <option value="Single Validity">Single Validity</option>
                 <option value="Multiple Validity">Multiple Validity</option>
@@ -372,13 +427,19 @@ function AddCourse() {
                     type="text"
                     name="search"
                     placeholder="Enter validity"
+                    onChange={(e) => setValidity(e.target.value)}
                     style={styles.courseInput}
                   />
                 </div>
               </div>
               <div className="col-md-6">
                 <div className="mb-4">
-                  <select className="mt-2" style={styles.selectField}>
+                  <select
+                    className="mt-2"
+                    style={styles.selectField}
+                    onChange={(e) => setValidityPeriod(e.target.value)}
+                  >
+                    <option value="">Select Time Period</option>
                     <option value="Days">Days</option>
                     <option value="Month">Month</option>
                     <option value="Year">Year</option>
@@ -406,6 +467,8 @@ function AddCourse() {
                   placeholder="Enter price"
                   style={styles.courseInput}
                   onChange={(e) => setPrice(e.target.value)}
+
+                  // onChange={(e) => setPrice(e.target.value)}
                 />
               </div>
               <div className="col-md-4">
@@ -420,6 +483,8 @@ function AddCourse() {
                   placeholder="Enter discount"
                   style={styles.courseInput}
                   onChange={(e) => setDiscount(e.target.value)}
+
+                  // onChange={(e) => setDiscount(e.target.value)}
                 />
               </div>
               <div className="col-md-4">
@@ -428,11 +493,22 @@ function AddCourse() {
                 </label>
                 <br />
                 <div className="mt-2" style={styles.courseInput}>
-                  {calculateEffectiveAmount(price, discount)}
+                  {effectivePrice}
                 </div>
               </div>
             </div>
             <div className="row mt-3">
+              <div className="mb-4">
+                <input
+                  type="checkbox"
+                  id="vehicle1"
+                  name="vehicle1"
+                  value="Bike"
+                  onChange={() => setChecked(!checked)}
+                />{" "}
+                <label for="vehicle1"> Mark as Featured</label>
+                <br />
+              </div>
               {/* <div className="mb-4">
                 <label>
                   <b>Add Video</b>
@@ -488,7 +564,8 @@ function AddCourse() {
           <Button
             className="ms-2 px-5"
             variant="info"
-            onClick={() => window.location.assign("/courses/add-modules")}
+            onClick={createCourse}
+            // onClick={() => window.location.assign("/courses/add-modules")}
           >
             Add Modules &nbsp; <i class="fa-solid fa-arrow-right-long"></i>
           </Button>

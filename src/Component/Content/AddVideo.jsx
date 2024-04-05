@@ -1,24 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./style/adddocument.css";
 import { Button, Offcanvas } from "react-bootstrap";
+import { deleteData, getData } from "../../Api-Service/apiHelper";
+import { apiUrl } from "../../Api-Service/apiConstants";
+import YouTube from "react-youtube";
 
 function AddVideo() {
-  const [show, setShow] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState([]);
-
-  const handleDocumentUpload = (e) => {
-    const file = e.target.files;
-    const selectedFiles = Array.from(file).map((file) => file);
-    setSelectedFiles(selectedFiles);
-  };
-  const handleSubmitChanges = (e) => {
-    setShow(false);
-  };
-  console.log("selectedFiles", selectedFiles);
-
-  const handleDeleteVideo = () => {
-    alert("Deleted");
-  };
   const styles = {
     uploadImage: {
       border: "1px dashed #25cff2",
@@ -58,6 +45,42 @@ function AddVideo() {
       // boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
     },
   };
+  const [show, setShow] = useState(false);
+  const [allVideo, setAllVideo] = useState([]);
+
+  const handleSubmitChanges = (e) => {
+    setShow(false);
+  };
+  // console.log("selectedFiles", selectedFiles);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+  const fetchData = async () => {
+    try {
+      const videoRes = await getData(apiUrl.GET_FREEMATERIAL_VIDEO);
+
+      setAllVideo(videoRes.data);
+      // const webResponse = await getData(apiUrl.GET_WEB_BANNER);
+      // setBannerData1(webResponse.data);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  console.log(allVideo, "allvideo");
+  const handleDeleteVideo = async (id) => {
+    try {
+      const res = await deleteData(`${apiUrl.DELETE_FREEMATERIAL_VIDEO}${id}`);
+      if (res) {
+        alert("Deleted Sucessfull");
+        window.location.reload();
+      } else {
+        alert("Something went wrong!");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div class="bodyContainer-0-1-281">
@@ -82,50 +105,52 @@ function AddVideo() {
         </div>
         {/* <div class="heading-0-1-294">Contents</div> */}
         <div class="container-0-1-369 mt-3">
-          {Array.from({ length: 3 }, (_, i) => (
-            <div class="root-0-1-372 root-d105-0-1-723 listItem-0-1-370">
+          {allVideo.map((video, index) => (
+            <div
+              class="root-0-1-372 root-d105-0-1-723 listItem-0-1-370"
+              key={index}
+            >
               <div class="content-0-1-373 flex1-0-1-385">
                 <iframe
                   style={{
                     width: "80px",
                     height: "60px",
                   }}
-                  src="https://www.youtube.com/embed/ZeY07Asv4KE"
+                  src={`https://www.youtube.com/embed/${video.youtubeLink
+                    .split("/")
+                    .pop()}`}
                   title="Big Reason Behind Changing My Youtube Channel Name!!!"
-                  frameborder="0"
+                  frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  referrerpolicy="strict-origin-when-cross-origin"
-                  allowfullscreen
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
                   aria-current
+                  autoPlay
                 ></iframe>
                 <div class="rightContentCont-0-1-375 rightContentCont-d107-0-1-725 flex1-0-1-385">
                   <a
-                    href="https://www.youtube.com/watch?v=ZeY07Asv4KE&t=306s"
+                    href={video.youtubeLink}
                     target="_blank"
                     style={{ textDecoration: "none" }}
                   >
                     <p class="heading-0-1-376 heading-d108-0-1-726 textTruncate-0-1-387">
-                      Ecom gyan ebook2023.pdf
+                      {video.Videotitle}
                     </p>
                   </a>
-                  <p class="subHeading-0-1-377 subHeading-d109-0-1-727">
+                  {/* <p class="subHeading-0-1-377 subHeading-d109-0-1-727">
                     Ronald C Matt
-                  </p>
+                  </p> */}
                 </div>
                 <div class="flex0-0-1-637 others-0-1-629 others-d5-0-1-645">
                   <div
                     style={{ cursor: "Pointer" }}
-                    onClick={() => handleDeleteVideo(i)}
+                    onClick={() => handleDeleteVideo(video._id)}
                   >
                     <img
                       src="https://classplusapp.com/diy/assets/trash-2-db8990c1..svg"
                       alt=""
                       class="iconImage-0-1-649"
                     />
-                    {/* <img
-                      src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAABwSURBVHgB7ZKxDcAwCAQhE3iEbJbaZTZwNnDtLptlBA9gRL5IalPgjpMsPxLwQnqiYAJbG3POxxijMnNHWVprt2VuIyMiUrA8Qe541TpnNgDpF98VvgaqemLxA9nxXxR4ETH1M4iYLiNi6mcQMV3GC9y1PBwBTT/ZAAAAAElFTkSuQmCC"
-                      alt="optionsIcon"
-                    /> */}
                   </div>
                   {/* {isOpen === i && (
                     <div style={{ position: "relative" }}>

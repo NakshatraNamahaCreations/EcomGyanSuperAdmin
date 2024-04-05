@@ -1,81 +1,159 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Offcanvas } from "react-bootstrap";
+import { manageBannerStyle as styles } from "../../Styles/JSXStyles";
 import "./style/managebanner.css";
+import { apiUrl } from "../../Api-Service/apiConstants";
+import { getData, postFormData, putData } from "../../Api-Service/apiHelper";
 
 function ManageBanners() {
+  const formData = new FormData();
   const [show, setShow] = useState(false);
   const [error, setError] = useState(null);
-  const [seteditView, setEditView] = useState(false);
+  const [editView, setEditView] = useState(false);
+  const [bannerData, setBannerData] = useState([]);
+  // const [bannerData1, setBannerData1] = useState([]);
+  const [selectedBannerData, setSelectedBannerData] = useState({});
+  const [newBanner, setNewBanner] = useState([
+    { selectScreen: "", screenImage: null },
+  ]);
+  const [editBanner, setEditBanner] = useState([
+    {
+      selectScreen: "",
+      screenImage: null,
+    },
+  ]);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const [bannerImage, setBannerImage] = useState(null);
-  const styles = {
-    uploadImage: {
-      border: "1px dashed #25cff2",
-    },
-    insideBox: {
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      color: "#25cff2",
-    },
-    bannerImageCont: {
-      width: "200px",
-      height: "150px",
-    },
-    imgStateText: {
-      fontSize: "14px",
-      fontStyle: "normal",
-      fontFamily: "inherit",
-      fontWeight: "600",
-      lineHeight: "16px",
-      paddingLeft: "11px",
-      color: "rgb(239, 105, 30)",
-    },
-    selectField: {
-      width: "100%",
-      border: "1px solid rgb(216, 224, 240)",
-      // borderRadius: "16px",
-      fontSize: "16px",
-      backgroundColor: "white",
-      outline: "none",
-      backgroundPosition: "10px 10px",
-      backgroundRepeat: "no-repeat",
-      padding: "12px 18px 11px 13px",
-      lineHeight: "20px",
-      // boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
-    },
+  // const fetchData = async () => {
+  //   try {
+  //     let data = await middlewareService.fetchData();
+  //     setBannerData(data);
+  //   } catch (error) {
+  //     console.log("Error: ", error);
+  //   }
+  // };
+
+  const fetchData = async () => {
+    try {
+      const appResponse = await getData(apiUrl.GET_APP_BANNER);
+      setBannerData(appResponse.data);
+      // const webResponse = await getData(apiUrl.GET_WEB_BANNER);
+      // setBannerData1(webResponse.data);
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
-  const handleBannerImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Check file type
-      const fileType = file.type;
-      if (!fileType.startsWith("image/")) {
-        // Display an error message on the screen
-        setError("Please upload a valid image file (PNG or JPEG).");
-        return;
-      }
-      // Check file size
-      const maxSize = 800 * 600; // 800px x 600px
-      if (file.size > maxSize) {
-        // Display an error message on the screen
-        setError("Image size should be 800px x 600px or smaller.");
-        return;
-      }
-      // Clear any previous errors
-      setError(null);
-      // Set thumbnail image
-      setBannerImage(file);
-    }
+  const handleEditChanges = (item) => {
+    setEditView(!editView);
+    setSelectedBannerData(item);
   };
 
   const handleSubmitChanges = (e) => {
     setShow(false);
   };
-  const handleEditChanges = (e) => {
-    setEditView(false);
+
+  const handleBannerImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const fileType = file.type;
+      if (!fileType.startsWith("image/")) {
+        setError("Please upload a valid image file (PNG or JPEG).");
+        return;
+      }
+      const maxSize = 800 * 600;
+      if (file.size > maxSize) {
+        setError("Image size should be 800px x 600px or smaller.");
+        return;
+      }
+      setError(null);
+      setNewBanner({ ...newBanner, screenImage: e.target.files[0] });
+    }
   };
+  // const editBannerImageChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const fileType = file.type;
+  //     if (!fileType.startsWith("image/")) {
+  //       setError("Please upload a valid image file (PNG or JPEG).");
+  //       return;
+  //     }
+  //     const maxSize = 800 * 600;
+  //     if (file.size > maxSize) {
+  //       setError("Image size should be 800px x 600px or smaller.");
+  //       return;
+  //     }
+  //     setError(null);
+  //     setEditBanner({ ...editBanner, screenImage: file }); // Assign the file to screenImage property
+  //   }
+  // };
+  const handleInputChange = (e) => {
+    setNewBanner({ ...newBanner, selectScreen: e.target.value });
+  };
+
+  const handleEditScreenSelection = (e) => {
+    const selectedValue = e.target.value;
+    setNewBanner((prevState) => ({
+      ...prevState,
+      screenName: selectedValue,
+    }));
+  };
+
+  const handleEditScreenImage = (e) => {
+    const selectedFile = e.target.files[0];
+    setNewBanner((prevState) => ({
+      ...prevState,
+      screenImage: selectedFile,
+    }));
+  };
+
+  console.log("editBanner", editBanner.screenName);
+  const addBanner = async (e) => {
+    e.preventDefault();
+    if (!newBanner.selectScreen || !newBanner.screenImage) {
+      alert("please fill all fields");
+    } else {
+      formData.append("screenName", newBanner.selectScreen);
+      formData.append("bannerImage", newBanner.screenImage);
+      formData.append("bannerType", "app");
+      try {
+        const response = await postFormData(apiUrl.CREATE_BANNERS, formData);
+        console.log("POST Request Success:", response);
+        alert("Added");
+        fetchData();
+        setShow(false);
+        setNewBanner("");
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+  };
+
+  const updateBanner = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("screenName", editBanner.selectScreen || "");
+    if (editBanner.screenImage) {
+      formData.append("bannerImage", editBanner.screenImage);
+    }
+    try {
+      const response = await putData(
+        `${apiUrl.EDIT_BANNERS}${selectedBannerData._id}`,
+        formData
+      );
+      console.log("POST Request Success:", response);
+      alert("Updated!");
+      fetchData();
+      setEditView(false);
+      setEditBanner({ selectScreen: "", screenImage: null }); // Reset editBanner state
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   return (
     <div className=" mt-4">
       <Button
@@ -86,8 +164,8 @@ function ManageBanners() {
         Add Banners
       </Button>
       <div className="row">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div className="col-md-4" key={i}>
+        {bannerData.map((ele, index) => (
+          <div className="col-md-4" key={index}>
             <div style={{ backgroundColor: "white" }}>
               <div class="Banner__Main__Left__Content__ImageSection">
                 <div>
@@ -106,7 +184,7 @@ function ManageBanners() {
                   <div class="UploadedImageArea" id="UploadedImageArea">
                     <img
                       class="panel-body-image Banner__Main__Left__Content__ImageSection--Image"
-                      src="https://cdn-wl-assets.classplus.co/production/single/glknlf/56a04f27-bee7-4b5a-bdd9-29e2c6b63ba0.png"
+                      src={`${apiUrl.IMAGEURL}/banners/${ele.bannerImage}`}
                       alt="notificationImage"
                       id="UploadedImage"
                       style={{ maxWidth: "100%", maxHeight: "100%" }}
@@ -123,16 +201,16 @@ function ManageBanners() {
                   </div>
                 </div>
                 <div class="Banner__Main__Left__Content__ImageSection--Select">
-                  <div class="Banner__Main__Left__Content__ImageSection--Select--Note">
-                    Select screen to open on tapping banner
-                  </div>
+                  {/* <div class="Banner__Main__Left__Content__ImageSection--Select--Note">
+                    Updated By:{moment(ele.updatedAt).format("MMM DD YYYY")}
+                  </div> */}
                   <div class="Banner__Main__Left__Content__ImageSection--Select--Action">
                     <div class="Banner__Main__Left__Content__ImageSection--Select--Action--Selected">
-                      YouTube Video
+                      {ele.screenName}
                     </div>
                     <div
                       class="Banner__Main__Left__Content__ImageSection--Select--Action--Change"
-                      onClick={() => setEditView(true)}
+                      onClick={() => handleEditChanges(ele)}
                     >
                       Change
                     </div>
@@ -170,7 +248,12 @@ function ManageBanners() {
             <label>
               <b>Select Landing Screen</b>
             </label>
-            <select className="mt-2 mb-4" style={styles.selectField}>
+            <select
+              className="mt-2 mb-4"
+              style={styles.selectField}
+              onChange={handleInputChange}
+            >
+              <option value="">Select</option>
               <option value="Store Tab">Store Tab</option>
               <option value="Specific Course(s)">Specific Course(s)</option>
               <option value="Category of Courses">Category of Courses</option>
@@ -186,16 +269,16 @@ function ManageBanners() {
                   style={{ display: "none" }}
                   id="icon-button-file"
                   type="file"
-                  onChange={(e) => handleBannerImageChange(e)}
+                  onChange={handleBannerImageChange}
                 />
                 <label htmlFor="icon-button-file">Upload Banner Image</label>
               </div>
             </div>
-            {bannerImage && (
+            {newBanner.screenImage && (
               <div style={styles.bannerImageCont}>
                 <img
-                  src={URL.createObjectURL(bannerImage)}
-                  alt={bannerImage}
+                  src={URL.createObjectURL(newBanner.screenImage)}
+                  alt={newBanner.screenImage}
                   style={{ width: "100%", height: "100%", marginTop: "20px" }}
                 />
               </div>
@@ -205,7 +288,7 @@ function ManageBanners() {
               {error && <div style={{ color: "red" }}>{error}</div>}
             </span>
             <div className="text-center mt-2">
-              <Button variant="info" onClick={handleSubmitChanges}>
+              <Button variant="info" onClick={addBanner}>
                 Save Changes
               </Button>
             </div>
@@ -214,19 +297,24 @@ function ManageBanners() {
       </Offcanvas>
       {/* banner edit ================= */}
       <Offcanvas
-        show={seteditView}
+        show={editView}
         onHide={() => setEditView(false)}
         placement="end"
       >
         <Offcanvas.Header closeButton>
-          <Offcanvas.Title>Edit Banner</Offcanvas.Title>
+          <Offcanvas.Title>{selectedBannerData.screenName} </Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
           <div className="">
             <label>
               <b>Select Landing Screen</b>
             </label>
-            <select className="mt-2 mb-4" style={styles.selectField}>
+            <select
+              className="mt-2 mb-4"
+              style={styles.selectField}
+              onChange={handleEditScreenSelection}
+            >
+              <option value="">Select</option>
               <option value="Store Tab">Store Tab</option>
               <option value="Specific Course(s)">Specific Course(s)</option>
               <option value="Category of Courses">Category of Courses</option>
@@ -242,25 +330,24 @@ function ManageBanners() {
                   style={{ display: "none" }}
                   id="icon-button-file"
                   type="file"
-                  onChange={(e) => handleBannerImageChange(e)}
+                  onChange={handleEditScreenImage}
                 />
                 <label htmlFor="icon-button-file">Upload Banner Image</label>
               </div>
             </div>
-            {bannerImage ? (
+            {editBanner.screenImage ? (
               <div style={styles.bannerImageCont}>
                 <img
-                  src={URL.createObjectURL(bannerImage)}
-                  alt={bannerImage}
+                  src={URL.createObjectURL(editBanner.screenImage)}
+                  alt={editBanner.screenImage}
                   style={{ width: "100%", height: "100%", marginTop: "20px" }}
                 />
               </div>
             ) : (
               <div style={styles.bannerImageCont}>
                 <img
-                  src="/20ca6a66-7599-4661-b64b-a73715a2893b.png"
-                  // src={URL.createObjectURL(bannerImage)}
-                  // alt={thumbnailImage.name}
+                  src={`${apiUrl.IMAGEURL}/banners/${selectedBannerData.bannerImage}`}
+                  // src={selectedBannerData.bannerImage}
                   style={{ width: "100%", height: "100%", marginTop: "20px" }}
                 />
               </div>
@@ -269,7 +356,7 @@ function ManageBanners() {
               {error && <div style={{ color: "red" }}>{error}</div>}
             </span>
             <div className="text-center mt-2">
-              <Button variant="info" onClick={handleEditChanges}>
+              <Button variant="info" onClick={updateBanner}>
                 Update
               </Button>
             </div>

@@ -80,7 +80,7 @@ function App() {
           }
         />
         <Route
-          path="/courses/add-modules"
+          path="/courses/add-modules/:objectId/:couserTitle"
           element={
             <Layout
               Children={
