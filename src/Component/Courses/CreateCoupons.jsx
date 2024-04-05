@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 import "./style/createcoupons.css";
-import { getData, postData } from "../../Api-Service/apiHelper";
+import { getData, postData, putData } from "../../Api-Service/apiHelper";
 import { apiUrl } from "../../Api-Service/apiConstants";
 
 function CreateCoupons({ handleClose }) {
@@ -82,11 +82,11 @@ function CreateCoupons({ handleClose }) {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [couponType, setCouponType] = useState("");
-  const [courseSelection, setCourseSelection] = useState("");
   const [noOfUseageType, setNoOfUseage] = useState("");
   const [useagePerStudent, setUseagePerStundent] = useState("");
-  const [courses, setCourseList] = useState([]);
+  const [courseList, setCourseList] = useState([]);
   const [couponObj, setCouponObj] = useState({});
+  const [selectedCourses, setSelectedCourses] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -101,7 +101,23 @@ function CreateCoupons({ handleClose }) {
       console.error("Error:", error);
     }
   };
-
+  const handleSelectedCourse = (course, isSelected) => {
+    if (isSelected) {
+      // Add the selected course to the selectedCourses array
+      setSelectedCourses((prevSelectedCourses) => [
+        ...prevSelectedCourses,
+        { courseId: course._id, courseName: course.courseName },
+      ]);
+    } else {
+      // Remove the deselected course from the selectedCourses array
+      setSelectedCourses((prevSelectedCourses) =>
+        prevSelectedCourses.filter(
+          (selectedCourse) => selectedCourse.courseId !== course._id
+        )
+      );
+    }
+  };
+  console.log("selectedItem", selectedCourses);
   const createCoupon = async () => {
     if (
       !offerName ||
@@ -127,7 +143,7 @@ function CreateCoupons({ handleClose }) {
           endDate: endDate,
           endTime: endTime,
           couponType: couponType,
-          courseSeletionType: courseSelection,
+          // courseSeletionType: courseSelection,
           couponLimitation: noOfUseageType,
           usagesPerStudent: useagePerStudent,
         };
@@ -143,6 +159,23 @@ function CreateCoupons({ handleClose }) {
       }
     }
   };
+  const applyCourse = async (id) => {
+    try {
+      const data = {
+        appliedCourses: selectedCourses,
+      };
+      // Move the alert inside the try block after postData
+      const res = await putData(`${apiUrl.APPLY_COUPON_FOR_COURSE}${id}`, data);
+      if (res) {
+        console.log("res", res);
+        alert("Completed");
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   console.log("couponObj", couponObj);
   return (
     <div className="addCourseMain-0-1-55 mt-3">
@@ -460,7 +493,7 @@ function CreateCoupons({ handleClose }) {
               </label>
             </div>
             <div className="mt-3 mb-5">
-              {courses.map((course, index) => (
+              {courseList.map((course, index) => (
                 <div
                   className="couponCourseCard_courseItemContainer__2-TnK false"
                   key={index}
@@ -496,11 +529,16 @@ function CreateCoupons({ handleClose }) {
                       <div class="ui fitted checkbox">
                         <input
                           type="checkbox"
-                          id="vehicle1"
-                          name="vehicle1"
-                          value="Bike"
+                          id={`courseCheckbox-${index}`}
+                          checked={selectedCourses.some(
+                            (selectedCourse) =>
+                              selectedCourse.courseId === course._id
+                          )}
+                          onChange={(e) =>
+                            handleSelectedCourse(course, e.target.checked)
+                          }
                         />
-                        <label></label>
+                        <label htmlFor={`courseCheckbox-${index}`}></label>
                       </div>
                     </div>
                   </div>
@@ -516,7 +554,11 @@ function CreateCoupons({ handleClose }) {
             >
               <i class="fa-solid fa-arrow-left-long"></i> &nbsp; Back
             </Button>
-            <Button className="ms-2 px-5" variant="info" onClick={handleClose}>
+            <Button
+              className="ms-2 px-5"
+              variant="info"
+              onClick={() => applyCourse(couponObj._id)}
+            >
               Finish
             </Button>
           </div>

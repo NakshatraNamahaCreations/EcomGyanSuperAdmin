@@ -2,19 +2,22 @@ import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import CreateCoupons from "./CreateCoupons";
 import "./style/managecoupons.css";
-import { getData } from "../../Api-Service/apiHelper";
+import { deleteData, getData, putData } from "../../Api-Service/apiHelper";
 import { apiUrl } from "../../Api-Service/apiConstants";
 import moment from "moment";
+import { useNavigate } from "react-router-dom";
 
 function ManageCoupons() {
+  const Navigate = useNavigate();
   const [show, setShow] = useState(false);
-  const [showDropDown, setShowDropDown] = useState(false);
-
+  const [openCouponObj, setOpenCouponObj] = useState({});
   const handleClose = () => {
     setShow(false);
   };
   const [couponList, setCouponList] = useState([]);
-
+  const [showDropDown, setShowDropDown] = useState(
+    Array(couponList.length).fill(false)
+  );
   useEffect(() => {
     fetchData();
   }, []);
@@ -29,6 +32,67 @@ function ManageCoupons() {
     }
   };
   console.log("couponList", couponList);
+  const handleOpenDropdown = (coupon, index) => {
+    setOpenCouponObj(coupon);
+    setShowDropDown((prevState) => {
+      const newDropDownState = [...prevState];
+      newDropDownState[index] = !newDropDownState[index];
+      return newDropDownState;
+    });
+  };
+  const editCoupon = (openCouponObj) => {
+    console.log("openCouponObj", openCouponObj);
+    // Navigate(
+    //   `/courses/add-modules/${openCouponObj._id}/${encodeURIComponent(
+    //     openCouponObj.offerName
+    //   )}`
+    // );
+  };
+
+  const activeCoupon = async (id) => {
+    try {
+      const res = await putData(`${apiUrl.ACTIVE_COUPON}${id}`);
+      if (res) {
+        alert("Activated");
+        // fetchData();
+        window.location.reload();
+      } else {
+        alert("Something went wrong!");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const inActiveCoupon = async (id) => {
+    try {
+      const res = await putData(`${apiUrl.INACTIVE_COUPON}${id}`);
+      if (res) {
+        alert("In-activated");
+        // fetchData();
+        window.location.reload();
+      } else {
+        alert("Something went wrong!");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleDeleteCoupon = async (id) => {
+    try {
+      const res = await deleteData(`${apiUrl.DELETE_COUPON}${id}`);
+      if (res) {
+        alert("Deleted Sucessfull");
+        fetchData();
+        // window.location.reload();
+      } else {
+        alert("Something went wrong!");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  console.log("openCouponObj", openCouponObj);
+
   return (
     <div className=" mt-4">
       {!show && (
@@ -72,8 +136,19 @@ function ManageCoupons() {
                           </div>
                         </div>
                         <div class="f-center-xy">
-                          <span class="sc-VigVT dbJHrw" color="#52B062">
-                            Active
+                          <span
+                            class="sc-VigVT dbJHrw"
+                            color="#52B062"
+                            style={{
+                              backgroundColor:
+                                coupon.couponStatus === true
+                                  ? "rgb(82, 176, 98)"
+                                  : "rgb(255, 64, 88)",
+                            }}
+                          >
+                            {coupon.couponStatus === true
+                              ? "Active"
+                              : "Inactive"}
                           </span>
                           <div
                             role="listbox"
@@ -93,34 +168,57 @@ function ManageCoupons() {
                             ></div>
                             <i
                               class="fa-solid fa-ellipsis-vertical CouponListCard_threeDots__1ExY8"
-                              onClick={() => setShowDropDown(!showDropDown)}
+                              onClick={() => handleOpenDropdown(coupon, index)}
                             ></i>
-                            {showDropDown && (
+                            {showDropDown[index] && (
                               <div class="menu transition CouponListCard_threeDotsMenu__18VGG">
-                                <div class="item an-dr-menu">
-                                  <a href="/coupons/65f44901a192c01c125619d8/edit">
-                                    <div class="flexrow alignCenter CouponListCard_couponMenuListItem__2N4JD">
-                                      <i class="fa-regular fa-pen-to-square"></i>
-                                      <span
-                                        class="fontMedium ms-2"
-                                        style={{ color: "rgba(0, 0, 0, 0.87)" }}
-                                      >
-                                        Details
-                                      </span>
-                                    </div>
-                                  </a>
+                                <div
+                                  class="item an-dr-menu"
+                                  onClick={() => editCoupon(openCouponObj)}
+                                >
+                                  {/* <a href="/coupons/65f44901a192c01c125619d8/edit"> */}
+                                  <div class="flexrow alignCenter CouponListCard_couponMenuListItem__2N4JD">
+                                    <i class="fa-regular fa-pen-to-square"></i>
+                                    <span
+                                      class="fontMedium ms-2"
+                                      style={{ color: "rgba(0, 0, 0, 0.87)" }}
+                                    >
+                                      Details
+                                    </span>
+                                  </div>
+                                  {/* </a> */}
                                 </div>
                                 <div class="item an-dr-menu">
-                                  <a href="/coupons/65f44901a192c01c125619d8/edit">
-                                    <div class="flexrow alignCenter CouponListCard_couponMenuListItem__2N4JD">
+                                  {/* <a href="/coupons/65f44901a192c01c125619d8/edit"> */}
+
+                                  {openCouponObj.couponStatus === true ? (
+                                    <div
+                                      class="flexrow alignCenter CouponListCard_couponMenuListItem__2N4JD"
+                                      onClick={() =>
+                                        inActiveCoupon(openCouponObj._id)
+                                      }
+                                    >
                                       <i class="fa-regular fa-circle-check"></i>
                                       <span class="fontMedium ms-2">
                                         Make Inactive
                                       </span>
                                     </div>
-                                  </a>
+                                  ) : (
+                                    <div
+                                      class="flexrow alignCenter CouponListCard_couponMenuListItem__2N4JD"
+                                      onClick={() =>
+                                        activeCoupon(openCouponObj._id)
+                                      }
+                                    >
+                                      <i class="fa-regular fa-circle-check"></i>
+                                      <span class="fontMedium ms-2">
+                                        Make Active
+                                      </span>
+                                    </div>
+                                  )}
+                                  {/* </a> */}
                                 </div>
-                                <div class="item an-dr-menu">
+                                {/* <div class="item an-dr-menu">
                                   <a href="/coupons/65f44901a192c01c125619d8/edit">
                                     <div class="flexrow alignCenter CouponListCard_couponMenuListItem__2N4JD">
                                       <i class="fa-solid fa-clock-rotate-left"></i>
@@ -129,16 +227,19 @@ function ManageCoupons() {
                                       </span>
                                     </div>
                                   </a>
-                                </div>
-                                <div class="item an-dr-menu">
-                                  <a href="/coupons/65f44901a192c01c125619d8/edit">
-                                    <div class="flexrow alignCenter CouponListCard_couponMenuListItem__2N4JD">
-                                      <i class="fa-regular fa-trash-can"></i>
-                                      <span class="fontMedium ms-2">
-                                        Delete
-                                      </span>
-                                    </div>
-                                  </a>
+                                </div> */}
+                                <div
+                                  class="item an-dr-menu"
+                                  onClick={() =>
+                                    handleDeleteCoupon(openCouponObj._id)
+                                  }
+                                >
+                                  {/* <a href="/coupons/65f44901a192c01c125619d8/edit"> */}
+                                  <div class="flexrow alignCenter CouponListCard_couponMenuListItem__2N4JD">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                    <span class="fontMedium ms-2">Delete</span>
+                                  </div>
+                                  {/* </a> */}
                                 </div>
                               </div>
                             )}
